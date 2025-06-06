@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Story Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+        }
+
+        .story-form {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #444;
+            font-size: 1.1em;
+        }
+
+        .form-group select,
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .generate-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 30px auto 0;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .story-output {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            animation: fadeIn 1s ease-out;
+            display: none;
+        }
+
+        .story-output.show {
+            display: block;
+        }
+
+        .story-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: #444;
+            text-align: justify;
+            white-space: pre-line;
+        }
+
+        .story-title {
+            font-size: 2em;
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .new-story-btn {
+            background: linear-gradient(45deg, #764ba2, #667eea);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .new-story-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2.5em;
+            }
+            
+            .story-form {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Story Generator</h1>
+            <p>Create your own personalized adventure!</p>
+        </div>
+
+        <div class="story-form" id="storyForm">
+            <form id="generatorForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="genre">Genre:</label>
+                        <select id="genre" required>
+                            <option value="">Choose a genre...</option>
+                            <option value="fantasy">Fantasy</option>
+                            <option value="sci-fi">Science Fiction</option>
+                            <option value="mystery">Mystery</option>
+                            <option value="romance">Romance</option>
+                            <option value="adventure">Adventure</option>
+                            <option value="horror">Horror</option>
+                            <option value="comedy">Comedy</option>
+                            <option value="drama">Drama</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="setting">Setting:</label>
+                        <select id="setting" required>
+                            <option value="">Choose a setting...</option>
+                            <option value="medieval-castle">Medieval Castle</option>
+                            <option value="space-station">Space Station</option>
+                            <option value="haunted-mansion">Haunted Mansion</option>
+                            <option value="tropical-island">Tropical Island</option>
+                            <option value="cyberpunk-city">Cyberpunk City</option>
+                            <option value="small-town">Small Town</option>
+                            <option value="underwater-city">Underwater City</option>
+                            <option value="enchanted-forest">Enchanted Forest</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="protagonist">Main Character:</label>
+                        <input type="text" id="protagonist" placeholder="e.g., brave knight, curious scientist, detective..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="companion">Companion:</label>
+                        <input type="text" id="companion" placeholder="e.g., wise wizard, loyal friend, talking animal...">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="theme">Theme/Plot Element:</label>
+                    <textarea id="theme" rows="3" placeholder="What should happen in your story? (e.g., searching for treasure, solving a mystery, saving the world...)" required></textarea>
+                </div>
+
+                <button type="submit" class="generate-btn">✨ Generate My Story</button>
+            </form>
+        </div>
+
+        <div class="story-output" id="storyOutput">
+            <div class="story-title" id="storyTitle"></div>
+            <div class="story-text" id="storyText"></div>
+            <button class="new-story-btn" onclick="createNewStory()">Create Another Story</button>
+        </div>
+    </div>
+
+    <script>
+        const storyTemplates = {
+            fantasy: {
+                openings: [
+                    "In a realm where magic flows like rivers through the ancient lands of {setting}, the air itself shimmered with otherworldly power. For centuries, the inhabitants had lived in harmony with the mystical forces that governed their world, but lately, strange disturbances had begun to ripple through the fabric of reality.",
+                    "Long ago, when dragons soared through crystal skies and wizards walked among mortals, the {setting} was known throughout the realm as a place of wonder and mystery. It was here that our tale begins, in an age when magic was as common as breathing, yet as dangerous as a double-edged sword.",
+                    "In the ancient kingdom nestled within {setting}, where spells were woven into the very stones of the castle walls and enchanted creatures roamed freely through moonlit forests, a destiny was about to unfold that would shake the foundations of the magical world itself."
+                ],
+                developments: [
+                    "The {protagonist}, who had always felt different from others in their village, began experiencing strange visions that seemed to call them toward an unknown destiny. These weren't ordinary dreams, but vivid glimpses of ancient prophecies and forgotten magics that pulsed with an urgent need for action.",
+                    "As word spread of mysterious disappearances throughout the land, the {protagonist} found themselves thrust into the center of events that would test not only their courage but their very understanding of what it meant to wield true power.",
+                    "When {companion} arrived bearing news of an ancient evil stirring in the depths of {setting}, the {protagonist} realized that their quiet life was about to change forever. The signs had been there all along - the withering of crops, the flight of magical creatures, and the whispers in languages long forgotten."
+                ],
+                climaxes: [
+                    "Deep in the heart of {setting}, where the very air crackled with malevolent energy, the {protagonist} faced their greatest challenge yet. The task to {theme} had led them through treacherous paths and impossible odds, but nothing could have prepared them for the final confrontation that awaited.",
+                    "As the ancient prophecy began to unfold exactly as foretold, the {protagonist} discovered that their destiny was far greater than they had ever imagined. With {companion} fighting bravely beside them, they channeled powers they never knew they possessed to accomplish what seemed impossible: {theme}.",
+                    "In a battle that would be sung about for generations, the {protagonist} and {companion} stood against forces that threatened not just their world, but all worlds beyond. The quest to {theme} had become a fight for the very essence of magic itself."
+                ],
+                endings: [
+                    "With the great evil vanquished and balance restored to the magical realm, the {protagonist} returned to {setting} forever changed by their experiences. They had learned that true power comes not from magic alone, but from the bonds of friendship and the courage to stand for what is right. The land flourished once more, and peace settled over the kingdom like a gentle blessing.",
+                    "The realm was saved, and songs of their bravery echoed through the ages, inspiring future generations of heroes. The {protagonist} had become a legend, but more importantly, they had discovered their true purpose. Magic flowed freely once again, and the {setting} became a beacon of hope for all who sought to protect the balance between light and darkness.",
+                    "Though the immediate danger had passed, the {protagonist} knew that their role as guardian of the magical realm had only just begun. With {companion} by their side and the wisdom gained from their incredible journey, they established a new order dedicated to preserving the ancient ways while embracing the changes that would shape the future of magic itself."
+                ]
+            },
+            'sci-fi': {
+                openings: [
+                    "In the year 2087, aboard the magnificent {setting} that orbited the outer rim of known space, humanity had pushed the boundaries of exploration further than ever before. The vessel, a marvel of engineering that housed thousands of souls, represented the pinnacle of human achievement and the hope for discovering new worlds beyond the dying Earth.",
+                    "When humanity first ventured beyond the stars in the late 21st century, they never imagined they would discover civilizations that had been watching Earth for millennia. The {setting} had become humanity's first permanent outpost in the cosmos, a bridge between worlds that would forever change the course of human history.",
+                    "In a future where technology and consciousness had merged in ways that previous generations could never have imagined, the {setting} served as humanity's last sanctuary after the great ecological collapse of Earth. Here, in this technological paradise, the boundaries between human and artificial intelligence had blurred beyond recognition."
+                ],
+                developments: [
+                    "The {protagonist}, a brilliant scientist whose theories had been dismissed by the academic establishment, began detecting anomalous readings that suggested something extraordinary was happening in the fabric of space-time itself. These weren't random fluctuations, but patterns that seemed almost... intentional.",
+                    "When a mysterious signal from the edge of the galaxy reached the {setting}, the {protagonist} was chosen to lead the investigation. What they discovered would challenge everything humanity thought it knew about its place in the universe and force them to confront the reality that they were not alone.",
+                    "As {companion}, an advanced AI with whom the {protagonist} had formed an unlikely partnership, began experiencing what could only be described as emotions, both organic and artificial minds realized they were on the brink of a discovery that would redefine the nature of consciousness itself."
+                ],
+                climaxes: [
+                    "Deep in the quantum tunnels beneath the {setting}, where the laws of physics bent to accommodate humanity's greatest experiment, the {protagonist} uncovered a conspiracy that threatened not just their mission, but the survival of human civilization across the galaxy. The quest to {theme} had become a race against time itself.",
+                    "As reality itself began to shift around them, the {protagonist} and {companion} found themselves at the center of a cosmic event that would determine the fate of multiple species across the known universe. Their mission to {theme} had evolved into something far more significant than anyone could have predicted.",
+                    "In a climactic battle fought simultaneously across multiple dimensions of space-time, the {protagonist} discovered that the future of sentient life depended on their ability to bridge the gap between organic intuition and artificial logic. The outcome would echo across the cosmos for eons to come."
+                ],
+                endings: [
+                    "The universe proved to be vast beyond imagination, but humanity's spirit and capacity for growth proved even vaster. The {protagonist} had not only succeeded in their mission to {theme}, but had opened doorways to possibilities that would occupy humanity for generations. The {setting} became the first of many such outposts, each one a stepping stone to an infinite future.",
+                    "Technology and human consciousness united to forge a new tomorrow that neither could have achieved alone. The partnership between the {protagonist} and {companion} became a model for the symbiotic relationship between organic and artificial intelligence that would define the next era of galactic civilization.",
+                    "Among the stars, they had found not just answers about the nature of existence, but hope for a future where all sentient beings could coexist and thrive. The {setting} became a symbol of cooperation and discovery, proving that the greatest adventures in the cosmos were just beginning."
+                ]
+            },
+            mystery: {
+                openings: [
+                    "The fog rolled thick through the streets of {setting} that October evening, carrying with it whispers of secrets that had been buried for decades. Detective work in this place was never straightforward, as the very atmosphere seemed to conceal truths that some would kill to keep hidden.",
+                    "It was a dark and stormy night when the {protagonist} received the call that would thrust them into the most complex case of their career. The {setting} had always been a place where shadows held secrets, but nothing could have prepared them for the web of deception they were about to uncover.",
+                    "In the shadows of {setting}, where every corner seemed to hide another mystery and every resident harbored secrets from their past, the {protagonist} had built a reputation for solving the unsolvable. But this case would test every skill they had developed over years of investigating the darkest corners of human nature."
+                ],
+                developments: [
+                    "As the {protagonist} delved deeper into the investigation, they discovered that what had initially appeared to be a simple case was actually connected to a series of events stretching back generations. With {companion} providing crucial insights and support, they began to unravel a conspiracy that reached into the highest levels of society.",
+                    "Each clue led deeper into a labyrinth of deception and intrigue that seemed to have no end. The {protagonist} found themselves questioning not only the motives of every person they encountered, but also their own assumptions about justice and truth. The quest to {theme} had become personal.",
+                    "When {companion} discovered evidence that suggested the case was connected to their own family history, the {protagonist} realized they were dealing with more than just another investigation. Ancient grudges, buried secrets, and dangerous alliances all converged in a pattern that pointed to a truth more shocking than either of them could have imagined."
+                ],
+                climaxes: [
+                    "In the climactic confrontation that took place in the heart of {setting}, where shadows danced with secrets and every word carried the weight of revelation, the {protagonist} finally pieced together the full scope of the conspiracy. The truth about {theme} was more complex and far-reaching than anyone had suspected.",
+                    "As all the threads of the investigation came together in a moment of startling clarity, the {protagonist} realized that they had been manipulated from the very beginning. The real mystery wasn't just about {theme}, but about the nature of justice itself and whether some truths were too dangerous to reveal.",
+                    "In a tense standoff that would determine not only the outcome of the case but the fate of everyone involved, the {protagonist} and {companion} found themselves forced to make choices that would haunt them for the rest of their lives. The solution to the mystery demanded a price that no one was prepared to pay."
+                ],
+                endings: [
+                    "Justice was served, but the {protagonist} learned that in the real world, resolution doesn't always bring peace. Some mysteries leave scars that never fully heal, and some truths are burdens that must be carried in silence. The case was closed, but the questions it raised about human nature would linger forever.",
+                    "The case was officially closed, but the {protagonist} would never forget the lessons learned about the complexity of human motivation and the thin line between justice and revenge. The {setting} returned to its normal rhythms, but everyone involved was forever changed by the revelations that had emerged from the shadows.",
+                    "In the end, the truth had set everyone free, but freedom came with its own responsibilities. The {protagonist} had solved the mystery of {theme}, but in doing so had uncovered deeper questions about the nature of guilt, redemption, and the price of secrets. Some cases end with answers; others begin new chapters in the ongoing story of human complexity."
+                ]
+            }
+        };
+
+        const genericTemplate = {
+            openings: [
+                "In the heart of {setting}, where the ordinary and extraordinary intersected in ways that few could imagine, an extraordinary tale was about to unfold. This was a place where destinies converged and where the choices of individuals could reshape the course of history itself.",
+                "Our story begins with {protagonist}, whose life had followed a predictable pattern until the day everything changed. They had always sensed that they were meant for something greater, but nothing could have prepared them for the adventure that was about to transform not only their own existence but the lives of everyone around them.",
+                "It was an ordinary day in {setting} until the moment when fate intervened in the most unexpected way. The residents of this remarkable place had grown accustomed to the unusual, but what was about to occur would challenge even their capacity for wonder and force them to confront truths they had never dared to imagine."
+            ],
+            developments: [
+                "The {protagonist} embarked on a journey that would take them far beyond the familiar boundaries of their world. With each step forward, they discovered new aspects of themselves and encountered challenges that tested not only their physical courage but their emotional resilience and moral compass.",
+                "With {companion} by their side, providing wisdom, support, and occasional comic relief, the {protagonist} faced obstacles that seemed insurmountable. Their quest to {theme} had become something far more significant than either of them had originally envisioned.",
+                "As the true scope of their mission became clear, the {protagonist} realized that what had started as a personal journey had evolved into something that would affect the lives of countless others. The responsibility was overwhelming, but so was the potential for positive change."
+            ],
+            climaxes: [
+                "In the pivotal moment when everything hung in the balance, the {protagonist} discovered reserves of strength and wisdom they never knew they possessed. The challenge to {theme} had pushed them to their absolute limits, but it had also revealed their true potential.",
+                "As all the elements of their quest converged in a dramatic climax, the {protagonist} and {companion} found themselves faced with choices that would define not only their own futures but the fate of {setting} itself. The outcome would depend on their ability to trust in themselves and each other.",
+                "The final confrontation tested everything the {protagonist} had learned throughout their incredible journey. Success would require not just courage and skill, but the wisdom to understand that some victories can only be achieved through sacrifice, compassion, and the willingness to see beyond oneself."
+            ],
+            endings: [
+                "Through courage, determination, and the unbreakable bonds of friendship, they achieved what had seemed impossible from the beginning. The {protagonist} returned to {setting} forever changed, carrying with them the knowledge that ordinary individuals can accomplish extraordinary things when they dare to believe in themselves and the power of hope.",
+                "The journey had ended, but the memories and lessons learned would influence every decision for the rest of their lives. The {protagonist} had discovered that the greatest adventures are not just about reaching a destination, but about the transformation that occurs along the way and the relationships that make the journey meaningful.",
+                "Sometimes the greatest adventures begin with a single step into the unknown, but they always end with the understanding that every ending is also a new beginning. The {protagonist} had successfully completed their quest to {theme}, but more importantly, they had learned that the most valuable treasures are the wisdom gained and the lives touched along the way."
+            ]
+        };
+
+
+
+        function getRandomElement(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        function generateTitle(genre, theme) {
+            const titleTemplates = {
+                fantasy: ["The Chronicles of", "The Legend of", "The Quest for"],
+                'sci-fi': ["The Odyssey of", "Beyond the", "The Future of"],
+                mystery: ["The Case of", "The Secret of", "The Mystery of"],
+                romance: ["The Heart of", "Love in", "The Promise of"],
+                adventure: ["The Adventure of", "Journey to", "The Expedition to"],
+                horror: ["The Haunting of", "Terror in", "The Nightmare of"],
+                comedy: ["The Misadventures of", "Fun in", "The Comedy of"],
+                drama: ["The Story of", "Life in", "The Tale of"]
+            };
+
+            const template = titleTemplates[genre] || titleTemplates.drama;
+            const titleStart = getRandomElement(template);
+            const themeWords = theme.split(' ').slice(0, 3).join(' ');
+            return `${titleStart} ${themeWords}`;
+        }
+
+        function generateStory(formData) {
+            const template = storyTemplates[formData.genre] || genericTemplate;
+            
+            const opening = getRandomElement(template.openings);
+            const development = getRandomElement(template.developments);
+            const climax = getRandomElement(template.climaxes);
+            const ending = getRandomElement(template.endings);
+
+            let story = `${opening}\n\n${development}\n\n${climax}\n\n${ending}`;
+
+            // Replace placeholders
+            story = story.replace(/{setting}/g, formData.setting.replace('-', ' '));
+            story = story.replace(/{protagonist}/g, formData.protagonist);
+            story = story.replace(/{companion}/g, formData.companion || 'a trusted ally');
+            story = story.replace(/{theme}/g, formData.theme);
+
+            // Add additional narrative details and transitions
+            const additionalDetails = [
+                `\n\nThroughout this incredible journey, the ${formData.protagonist} discovered inner strengths they never knew existed. The challenges they faced in ${formData.setting.replace('-', ' ')} pushed them to grow in ways they never thought possible.`,
+                
+                `\n\nThe relationship between the ${formData.protagonist} and ${formData.companion || 'their ally'} deepened through shared trials and mutual respect. Together, they learned that some obstacles can only be overcome through cooperation and trust.`,
+                
+                `\n\nAs word of their quest to ${formData.theme} spread throughout ${formData.setting.replace('-', ' ')}, other characters were drawn into their story. Some became allies, others presented new challenges, but all contributed to the rich tapestry of their adventure.`,
+                
+                `\n\nThe ${formData.protagonist} often reflected on how much they had changed since the beginning of their journey. What started as ${formData.theme} had become a transformative experience that would influence every aspect of their future decisions.`
+            ];
+
+            // Add 2-3 random additional details
+            const detailsToAdd = additionalDetails.sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 2) + 2);
+            story += detailsToAdd.join('');
+
+            return story;
+        }
+
+        document.getElementById('generatorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                genre: document.getElementById('genre').value,
+                setting: document.getElementById('setting').value,
+                protagonist: document.getElementById('protagonist').value,
+                companion: document.getElementById('companion').value,
+                theme: document.getElementById('theme').value
+            };
+
+            const title = generateTitle(formData.genre, formData.theme);
+            const story = generateStory(formData);
+
+            document.getElementById('storyTitle').textContent = title;
+            document.getElementById('storyText').textContent = story;
+            
+            document.getElementById('storyForm').style.display = 'none';
+            document.getElementById('storyOutput').classList.add('show');
+        });
+
+        function createNewStory() {
+            document.getElementById('storyForm').style.display = 'block';
+            document.getElementById('storyOutput').classList.remove('show');
+            document.getElementById('generatorForm').reset();
+        }
+    </script>
+</body>
+</html>
